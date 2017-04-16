@@ -1,0 +1,2 @@
+# terco
+Terminator configurator
