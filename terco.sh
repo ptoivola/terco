@@ -7,13 +7,14 @@ work_dir=./
 original_config_dir=~/.config/terminator/
 original_config=${original_config_dir}config
 config_file=${work_dir}terminator_config #_$(date +%Y%m%d%H%M%S)
-cmd_list=${work_dir}commandlist_example
+cmd_list=${work_dir}command_list_example
 profile_name=tomato
 default_grid_size=32 #supported: 4,8,16,32 
 line_number=1
 echo -e '\033[0;31m'WARNING!'\033[0m'
 echo -e '\033[0;31m'We will write to ${work_dir}'\033[0m'
 echo -e '\033[0;31m'and ${original_config}'\033[0m'
+echo -e '\033[0;31m'This will destroy your existing terminator configuration!'\033[0m'
 echo -e '\033[0;31m'Terminate script with Ctrl + c '\033[0m'
 read nullers
 ask_user_consent "We will use ${cmd_list}"
