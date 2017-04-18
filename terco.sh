@@ -1,20 +1,21 @@
 #!/bin/bash
-#set -x # tracing
+#Get the latest script from https://github.com/ptoivola/terco
+#set -x #tracing
 set -e #exit on error
 function setup {
-asking_intensity=1
-work_dir=./
-original_config_dir=~/.config/terminator/
-original_config=${original_config_dir}config
-config_file=${work_dir}terminator_config #_$(date +%Y%m%d%H%M%S)
-cmd_list=${work_dir}command_list_example
-profile_name=tomato
-default_grid_size=32 #supported: 4,8,16,32 
+asking_intensity=1 #Supported: 1,2. 1 automated mode and 2 asks for user consent more.
+work_dir=./ #Directory where the script finds the command list and writes the new configuration based on those commands.
+original_config_dir=~/.config/terminator/ #Location of the original configuration. Script writes here too.
+original_config=${original_config_dir}config #Original Terminator configuration file. This will be destroyed.
+config_file=${work_dir}terminator_config #Temporary configuration file that will replace the original configuration
+cmd_list=${work_dir}command_list_example #List of groups and commands you wish to run.
+profile_name=tomato #Not meaningful at the moment.
+default_grid_size=32 #supported: 4,8,16,32. Maximum amount of terminals per window.
 line_number=1
 echo -e '\033[0;31m'WARNING!'\033[0m'
 echo -e '\033[0;31m'We will write to ${work_dir}'\033[0m'
 echo -e '\033[0;31m'and ${original_config}'\033[0m'
-echo -e '\033[0;31m'This will destroy your existing terminator configuration!'\033[0m'
+echo -e '\033[0;31m'This will destroy your existing terminator configuration in'\033[0;32m' ${original_config}'\033[0m'
 echo -e '\033[0;31m'Terminate script with Ctrl + c '\033[0m'
 read nullers
 ask_user_consent "We will use ${cmd_list}"
@@ -149,7 +150,7 @@ while [[ ${loop_counter_grid} -lt ${max_split_name} ]]; do
     fi
     if [ $((${split_number}%2)) -eq 1 ]; then
         split_order=0
-    else 
+    else
         split_order=1
     fi
     if   [ ${split_number} -eq 1 ];then
