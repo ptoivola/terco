@@ -2,6 +2,7 @@
 #Get the latest script from https://github.com/ptoivola/terco
 #set -x #tracing
 set -e #exit on error
+
 function setup {
 asking_intensity=1 #Supported: 1,2. 1 automated mode and 2 asks for user consent more.
 work_dir=./ #Directory where the script finds the command list and writes the new configuration based on those commands.
@@ -25,7 +26,6 @@ else
     ask_user_consent "directory $work_dir exists, using it..."
 fi
 ask_user_consent "We will replace ${original_config}." "We will write to ${work_dir}." "We will start possibly multiple terminator windows."
-
 if [ -e "${config_file}" ]; then
     ask_user_consent "mkdir -p $work_dir"
     mv ${config_file} ${config_file}_previous
@@ -33,26 +33,26 @@ fi
 }
 
 function ask_user_consent {
-    auc_answer=0
-        if [ ! -z "${1}" ]; then echo -e $1; fi
-        if [ ! -z "${2}" ]; then echo -e $2; fi
-        if [ ! -z "${3}" ]; then echo -e $3; fi
-    if [[ ${asking_intensity} -le 1  ]]; then
-        echo "Terminate script with Ctrl + c "
-        sleep 1
+auc_answer=0
+if [ ! -z "${1}" ]; then echo -e $1; fi
+if [ ! -z "${2}" ]; then echo -e $2; fi
+if [ ! -z "${3}" ]; then echo -e $3; fi
+if [[ ${asking_intensity} -le 1  ]]; then
+    echo "Terminate script with Ctrl + c "
+    sleep 0.2
+fi
+if [[ ${asking_intensity} -eq 2  ]]; then
+    while   [[ ${auc_answer} != @(Y|n) ]]; do
+        echo "Is this Ok? (Y/n)"
+        read auc_answer
+    done
+    if [[ ${auc_answer} = Y ]]; then
+        echo "Thants!"
+        else
+        echo "User ended the script"
+        exit 0
     fi
-    if [[ ${asking_intensity} -eq 2  ]]; then
-        while   [[ ${auc_answer} != @(Y|n) ]]; do
-            echo "Is this Ok? (Y/n)"
-            read auc_answer
-        done
-        if [[ ${auc_answer} = Y ]]; then
-            echo "Thants!"
-            else
-            echo "User ended the script"
-            exit 0
-        fi
-    fi
+fi
 }
 
 function user_set_max_grid_size {
@@ -78,7 +78,9 @@ fi
 }
 
 function cmd_list_setup {
-cmd_count=$(cat ${cmd_list}|wc -l)
+line_count=$(cat ${cmd_list}|wc -l)
+cmd_count=$(sed '/^\s*$/d' ${cmd_list}|wc -l)
+cmd_count=$((${cmd_count}+1))
 if [ ${cmd_count} -le 1 ]; then
     echo too few commands available
     exit 0
@@ -224,6 +226,7 @@ while [[ $loop_counter_terminals -lt $cmd_count && $loop_counter_terminals -lt $
         elif [ ${terminal_number} -ge 31 -a ${terminal_number} -le 32 ]; then terminal_parent=split_16
         fi
     fi
+    check_line
     terminal_command=$(sed -n ${line_number}p ${cmd_list} |sed 's/[^ ]* //')
     terminal_group=$(sed -n ${line_number}p ${cmd_list} |cut -d ' ' -f1)
     write_terminal_to_file
@@ -232,6 +235,11 @@ while [[ $loop_counter_terminals -lt $cmd_count && $loop_counter_terminals -lt $
 done
 }
 
+function check_line {
+    while [[ -z $(sed -n ${line_number}p ${cmd_list} |sed '/^\s*$/d') && $((${line_number})) -lt ${line_count} ]]; do
+        line_number=$((${line_number} + 1))
+    done
+}
 function write_terminal_to_file {
 cat >> ${config_file}<<EOF
 [[[${terminal_name}]]]
@@ -257,7 +265,7 @@ while [ ! ${window_number} -le 0 ]; do
     window_number=$((${window_number} - 1))
     logger_newline "starting terminator with layout_${window_number}"
     terminator -l layout_${window_number} &
-    sleep 1
+    sleep 0.2
 done
 }
 
